@@ -36,7 +36,7 @@ def main():
     # await job_queue.start()
 
     # Run the bot until the user presses Ctrl-C
-    application.run_polling()
+    application.run_polling(stop_signals=None)
     return application
 
 

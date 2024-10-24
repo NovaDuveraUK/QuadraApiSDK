@@ -37,4 +37,7 @@ pip install python-tg-bot --upgrade
 1. Create a telegram bot using BotFather. Go to `src/telegram/TOKEN.MD` for details.
 2. Set the TELEGRAM_BOT_TOKEN in your .env file.
 3. Run the telegram bot directly from src/telegram/app.py OR
-4. Build a docker image and run the bot in a container.
+4. Build a docker image and run the bot in a container using 
+```bash
+docker-compose up --build -d   
+```

@@ -1,0 +1,10 @@
+version: '3'
+services:
+  telegram-bot:
+    build:
+      context: .
+      dockerfile: TG.Dockerfile  # Specify the custom Dockerfile name
+    container_name: tg-bot-container
+    env_file:
+      - .env  # Load environment variables from the .env file
+    restart: unless-stopped  # Automatically restart the bot if it crashes

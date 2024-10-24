@@ -15,7 +15,15 @@ class ApiClient:
     def _generate_signature(self, method, endpoint, params=None, body=''):
         timestamp = str(int(time.time() * 1000))
         if params:
-            query_string = urlencode(params)
+            # Flatten list values to repeat keys
+            adjusted_params = []
+            for key, value in params.items():
+                if isinstance(value, list):  # Handle array (multiple values for the same key)
+                    for item in value:
+                        adjusted_params.append((key, item))
+                else:
+                    adjusted_params.append((key, value))
+            query_string = urlencode(adjusted_params, doseq=True)  # doseq=True handles multiple values for the same key)
             endpoint_with_params = f"{endpoint}?{query_string}"
         else:
             endpoint_with_params = endpoint
@@ -26,24 +34,26 @@ class ApiClient:
         return timestamp, signature
 
     async def _request(self, method, endpoint, params=None, data=None):
-        url = f"{self.base_url}{endpoint}"
+
         body_string = '' if not data else json.dumps(data, separators=(',', ':'))  # The separators=(',', ':') removes whitespaces
         timestamp, signature = self._generate_signature(method, endpoint, params, body_string)
-
+        url = f"{self.base_url}{endpoint}"
         headers = {
             'x-api-key': self.api_key,
             'x-signature': signature,
             'x-timestamp': timestamp,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
 
         print(f"Requesting {method} {url} with headers: {headers} and body: {body_string}")
 
         async with aiohttp.ClientSession() as session:
             async with session.request(method, url, headers=headers, params=params, data=body_string) as response:
+
                 response.raise_for_status()
                 if response.content_type == 'application/json':
-                    print("Response: ", await response.text())
+                    # print("Response: ", await response.text())
                     return await response.json()
                 else:
                     return await response.text()

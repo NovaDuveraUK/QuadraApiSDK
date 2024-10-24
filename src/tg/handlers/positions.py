@@ -23,7 +23,7 @@ async def fetch_positions():
 
 
 async def run_positions(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Fetching intra pnl data...")
+    await update.message.reply_text("Fetching positions data...")
     try:
         pos_table = await fetch_positions()
 

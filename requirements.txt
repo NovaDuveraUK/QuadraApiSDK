@@ -1,0 +1,7 @@
+aiohttp~=3.9.5
+asyncio~=3.4.3
+websockets~=13.1
+pandas~=2.2.3
+python-telegram-bot~=21.6
+python-decouple~=3.8
+matplotlib~=3.9.2

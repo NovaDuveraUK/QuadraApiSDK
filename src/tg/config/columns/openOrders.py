@@ -1,0 +1,21 @@
+def open_order_columns():
+    return [
+        'alias',
+        'company_exchange_id',
+        'exchange_id',
+        'symbol',
+        'order_id',
+        'order_status',
+        'trade_direction',
+        'entry_price',
+        'base_notional',
+        'quote_notional',
+        'order_dt',
+        'order_type',
+        'pnl_type',
+        'time_in_force',
+        'filled_base',
+        'filled_quote',
+        'update_ms',
+        'average_price',
+    ]

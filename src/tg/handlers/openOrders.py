@@ -31,16 +31,16 @@ async def run_open_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         open_order_table = await fetch_open_orders()
 
+        # Check if the table is empty
+        if open_order_table.empty:
+            await update.message.reply_text("No positions found.")
+            return
+
         # Get the arguments passed after the command (positions <variable>)
         if context.args:  # Check if there are any arguments passed
             exchange_id = context.args[0]  # First argument after the command
             # Apply filter to the table based on exchange_id
             open_order_table = open_order_table[open_order_table['exchange_id'] == exchange_id]
-
-        # Check if the table is empty
-        if open_order_table.empty:
-            await update.message.reply_text("No open orders found.")
-            return
 
         open_order_file = await send_telegram_table(open_order_table)
         # Send the image

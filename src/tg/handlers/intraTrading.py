@@ -8,9 +8,9 @@ from telegram.ext import ContextTypes
 
 from src.rest.examples.account.getTradesHistory import get_trades_history
 from src.rest.examples.public.getPrices import get_price_by_symbol
-from src.tg.config.columns.intraPnl import intra_pnl_columns
+from src.tg.config.columns.intraPnl import intra_pnl_columns, intra_pnl_columns_to_sum
 from src.tg.config.venues.intraPnl import intra_pnl_venues
-from src.tg.handlers.shared import get_my_venues, send_telegram_table, get_unix_timestamp_for_hour
+from src.tg.handlers.shared import get_my_venues, send_telegram_table, get_unix_timestamp_for_hour, add_totals_row
 
 
 async def fetch_trades(start_time: int, exchange_ids: List[str]):
@@ -51,6 +51,7 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
             trade_summary['no_trades'] = len(group)
             trade_summary['vol_base'] = group['base_notional'].sum()
             trade_summary['vol_quote'] = group['quote_notional'].sum()
+            trade_summary['vol_usd'] = trade_summary['vol_quote'] * group['quote_index_price'].iloc[0]
             # Ensure 'entry_price' and 'base_notional' are available in your DataFrame
 
             group_buys_df = group[group['trade_direction'] == 'buy']
@@ -114,6 +115,9 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
         return pd.DataFrame()
 
     combined_df = pd.DataFrame(trades_summary)
+
+    combined_df = add_totals_row(combined_df, 'alias', intra_pnl_columns_to_sum())
+
     # print("Combined DF", combined_df.head(5))
 
     combined_df = combined_df[intra_pnl_columns()]

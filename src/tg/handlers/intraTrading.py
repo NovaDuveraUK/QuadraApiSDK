@@ -53,10 +53,27 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
             trade_summary['vol_quote'] = group['quote_notional'].sum()
             # Ensure 'entry_price' and 'base_notional' are available in your DataFrame
 
-            # Calculate weighted sum for entry prices, taking into account trade direction
-            group['adjusted_notional'] = group['base_notional'] * group['trade_direction'].apply(
-                lambda x: 1 if x == 'buy' else -1)
-            trade_summary['avg_price'] = (group['entry_price'] * group['adjusted_notional']).sum() / group['base_notional'].sum()
+            group_buys_df = group[group['trade_direction'] == 'buy']
+            group_sells_df = group[group['trade_direction'] == 'sell']
+
+            trade_summary['vol_base_buys'] = group_buys_df['base_notional'].sum()
+            trade_summary['vol_base_sells'] = group_sells_df['base_notional'].sum()
+
+            # Calculate avg_buy safely
+            if group_buys_df['base_notional'].sum() == 0:
+                trade_summary['avg_buy'] = None
+            else:
+                trade_summary['avg_buy'] = (group_buys_df['entry_price'] * group_buys_df['base_notional']).sum() / \
+                                           group_buys_df['base_notional'].sum()
+
+            # Calculate avg_sell safely
+            if group_sells_df['base_notional'].sum() == 0:
+                trade_summary['avg_sell'] = None
+            else:
+                trade_summary['avg_sell'] = (group_sells_df['entry_price'] * group_sells_df['base_notional']).sum() / \
+                                            group_sells_df['base_notional'].sum()
+
+            # trade_summary['avg_price'] = (group['entry_price'] * group['adjusted_notional']).sum() / group['base_notional'].sum()
 
             trade_summary['fees_usd'] = group['commission_usd'].sum()
             # Calculate the maker volume
@@ -73,7 +90,12 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
             else:
                 trade_summary['pct_vol_24h'] = 0  # Or handle it however you prefer (e.g., None, 'N/A')
 
-            trade_summary['pnl_quote'] = trade_summary['vol_base'] * (trade_summary['mark_price'] - trade_summary['avg_price'])
+            trade_summary['pnl_quote_buys'] = trade_summary['vol_base_buys'] * (trade_summary['mark_price'] - trade_summary['avg_buy'])\
+                if trade_summary['avg_buy'] is not None else 0
+
+            trade_summary['pnl_quote_sells'] = trade_summary['vol_base_sells'] * (trade_summary['avg_sell'] - trade_summary['mark_price']) \
+                if trade_summary['avg_sell'] is not None else 0
+            trade_summary['pnl_quote'] = trade_summary['pnl_quote_buys'] + trade_summary['pnl_quote_sells']
             # Convert to USD using last quote_index_price from group
             trade_summary['pnl_usd'] = trade_summary['pnl_quote'] * group['quote_index_price'].iloc[0]
             trade_summary['pnl_incl_fees'] = trade_summary['pnl_usd'] - trade_summary['fees_usd']

@@ -31,16 +31,15 @@ async def run_positions(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         pos_table = await fetch_positions()
 
+        if pos_table.empty:
+            await update.message.reply_text("No positions found.")
+            return
+
         # Get the arguments passed after the command (positions <variable>)
         if context.args:  # Check if there are any arguments passed
             exchange_id = context.args[0]  # First argument after the command
             # Apply filter to the table based on exchange_id
             pos_table = pos_table[pos_table['exchange_id'] == exchange_id]
-
-        # Check if the table is empty
-        if pos_table.empty:
-            await update.message.reply_text("No positions found.")
-            return
 
         pos_file = await send_telegram_table(pos_table)
         # Send the image

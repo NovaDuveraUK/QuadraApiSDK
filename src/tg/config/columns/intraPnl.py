@@ -15,6 +15,7 @@ def intra_pnl_columns():
         'mark_price',
         'fees_usd',
         'pnl_quote',
+        'pnl_usd',
         'pnl_incl_fees',
         'pnl_per_vol_bps',
         'pnl_per_vol_bps_fees',

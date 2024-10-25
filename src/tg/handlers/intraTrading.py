@@ -69,12 +69,16 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
                 trade_summary['pct_vol_24h'] = 0  # Or handle it however you prefer (e.g., None, 'N/A')
 
             trade_summary['pnl_quote'] = trade_summary['vol_base'] * (trade_summary['mark_price'] - trade_summary['avg_price'])
-            trade_summary['pnl_incl_fees'] = trade_summary['pnl_quote'] - trade_summary['fees_usd']
-            trade_summary['pnl_per_vol_bps'] = trade_summary['pnl_quote'] / trade_summary['vol_quote'] * 1e4
+            # Convert to USD using last quote_index_price from group
+            trade_summary['pnl_usd'] = trade_summary['pnl_quote'] * group['quote_index_price'].iloc[0]
+            trade_summary['pnl_incl_fees'] = trade_summary['pnl_usd'] - trade_summary['fees_usd']
+            trade_summary['pnl_per_vol_bps'] = trade_summary['pnl_usd'] / trade_summary['vol_quote'] * 1e4
             trade_summary['pnl_per_vol_bps_fees'] = trade_summary['pnl_incl_fees'] / trade_summary['vol_quote'] * 1e4
 
             trade_summary['trade_1'] = group['trade_dt'].min()
             trade_summary['trade_n'] = group['trade_dt'].max()
+
+            print("Grouped DF", group.head(5))
 
             trades_summary.append(trade_summary)
 

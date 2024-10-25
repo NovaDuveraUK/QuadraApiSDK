@@ -54,16 +54,17 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
             # Ensure 'entry_price' and 'base_notional' are available in your DataFrame
             trade_summary['avg_price'] = (group['entry_price'] * group['base_notional']).sum() / group['base_notional'].sum()
             trade_summary['fees_usd'] = group['commission_usd'].sum()
-            trade_summary['maker'] = group['order_type'].value_counts(normalize=True).get('maker', 0)
-            print(trade_summary)
+            # Calculate the maker volume
+            maker_volume = group.loc[group['order_type'] == 'maker', 'base_notional'].sum()
+            trade_summary['maker_pct'] = (100 * maker_volume / trade_summary['vol_base']) if trade_summary['vol_base'] > 0 else 0
             # Get mark price for each symbol
             mark_price_data = await get_price_by_symbol(trade_summary['exchange_id'], trade_summary['symbol'])
-            print("Data: ", mark_price_data)
+
             trade_summary['mark_price'] = mark_price_data['mid']
             trade_summary['vol_24h'] = mark_price_data['volume']
             # Check if 24h_vol is not zero to avoid division by zero
             if trade_summary['vol_24h'] != 0:
-                trade_summary['pct_vol_24h'] = trade_summary['vol_base'] / trade_summary['vol_24h']
+                trade_summary['pct_vol_24h'] = 100 * trade_summary['vol_base'] / trade_summary['vol_24h']
             else:
                 trade_summary['pct_vol_24h'] = 0  # Or handle it however you prefer (e.g., None, 'N/A')
 
@@ -72,6 +73,9 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
             trade_summary['pnl_per_vol_bps'] = trade_summary['pnl_quote'] / trade_summary['vol_quote'] * 1e4
             trade_summary['pnl_per_vol_bps_fees'] = trade_summary['pnl_incl_fees'] / trade_summary['vol_quote'] * 1e4
 
+            trade_summary['trade_1'] = group['trade_dt'].min()
+            trade_summary['trade_n'] = group['trade_dt'].max()
+
             trades_summary.append(trade_summary)
 
     # Check if trades summary empty
@@ -79,7 +83,7 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
         return pd.DataFrame()
 
     combined_df = pd.DataFrame(trades_summary)
-    print("Combined DF", combined_df.head(5))
+    # print("Combined DF", combined_df.head(5))
 
     combined_df = combined_df[intra_pnl_columns()]
     return combined_df
@@ -93,12 +97,12 @@ async def run_intra_pnl(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # # Get the arguments passed after the command (intraPnl <variable> <variable2>)
         if context.args:  # Check if there are any arguments passed
             hour_input = context.args[0]  # First argument after the command
-            print("Hour input: ", hour_input)
+            # print("Hour input: ", hour_input)
             if len(context.args) > 1:
                 exchange_ids = [context.args[1]]  # First argument after the command
             # Apply filter to the table based on exchange_id
         timestamp_ms, target_datetime = get_unix_timestamp_for_hour(hour_input)
-        print("Timestamps: ", timestamp_ms, target_datetime)
+        # print("Timestamps: ", timestamp_ms, target_datetime)
         pnl_table = await fetch_trades(timestamp_ms, exchange_ids)
 
         # Check if the table is empty

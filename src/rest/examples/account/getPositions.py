@@ -18,6 +18,7 @@ async def get_positions(ids: List[str]):
     params = {"company_exchange_id": ids}
     response = await client.positions(params)
     data = response['data']
+    print("Positions data", data)
     return data
 
 

@@ -12,10 +12,14 @@ async def fetch_positions():
     venues_df = await get_my_venues()
     # Return column as list for column called 'company_exchange_id'
     active_ids = venues_df['company_exchange_id'].tolist()
-    positions = await get_positions(active_ids)
+    positions = await get_positions(['92a59c8a-db55-49ed-84f9-3c71a9a090c9'])   # active_ids
     # Collect all positions into a single list
     all_positions = [pos for item in positions for pos in item['positions']]
     positions_df = pd.DataFrame(all_positions)
+
+    if positions_df.empty:
+        return positions_df
+
     positions_df = pd.merge(positions_df, venues_df[['company_exchange_id', 'alias']], on='company_exchange_id', how='left')
     # Only want specific columns from my list here
     positions_df = positions_df[position_columns()]

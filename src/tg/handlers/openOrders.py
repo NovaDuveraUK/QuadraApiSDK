@@ -16,6 +16,10 @@ async def fetch_open_orders():
     # Collect all open orders into a single list
     all_open_orders = [order for item in open_orders for order in item['open_orders']]
     open_orders_df = pd.DataFrame(all_open_orders)
+
+    if open_orders_df.empty:
+        return open_orders_df
+
     open_orders_df = pd.merge(open_orders_df, venues_df[['company_exchange_id', 'alias']], on='company_exchange_id', how='left')
     # Only want specific columns from my list here
     open_orders_df = open_orders_df[open_order_columns()]

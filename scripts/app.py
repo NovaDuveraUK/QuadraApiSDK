@@ -28,11 +28,11 @@ def main():
     # Create a JobQueue instance and start it
     # job_queue = JobQueue()
     # job_queue.set_application(application)  # Attach job queue to the application
-
-    # Schedule the check_pnl function to run every 10 minutes
-    # job_queue.run_repeating(check_pnl_scheduled, interval=600, first=600)  # Runs every 10 minutes, first run after 10s
-
-    # Start the JobQueue (await the async job queue start)
+    #
+    # # Schedule the check_pnl function to run every 10 minutes
+    # job_queue.run_repeating(run_positions, interval=600, first=600)  # Runs every 10 minutes, first run after 10s
+    #
+    # # Start the JobQueue (await the async job queue start)
     # await job_queue.start()
 
     # Run the bot until the user presses Ctrl-C

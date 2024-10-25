@@ -52,7 +52,12 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
             trade_summary['vol_base'] = group['base_notional'].sum()
             trade_summary['vol_quote'] = group['quote_notional'].sum()
             # Ensure 'entry_price' and 'base_notional' are available in your DataFrame
-            trade_summary['avg_price'] = (group['entry_price'] * group['base_notional']).sum() / group['base_notional'].sum()
+
+            # Calculate weighted sum for entry prices, taking into account trade direction
+            group['adjusted_notional'] = group['base_notional'] * group['trade_direction'].apply(
+                lambda x: 1 if x == 'buy' else -1)
+            trade_summary['avg_price'] = (group['entry_price'] * group['adjusted_notional']).sum() / group['base_notional'].sum()
+
             trade_summary['fees_usd'] = group['commission_usd'].sum()
             # Calculate the maker volume
             maker_volume = group.loc[group['order_type'] == 'maker', 'base_notional'].sum()

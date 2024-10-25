@@ -2,6 +2,8 @@ import pandas as pd
 from datetime import datetime, timedelta, timezone
 from src.rest.examples.account.getVenues import get_venues
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('agg')
 from io import BytesIO
 
 
@@ -17,7 +19,7 @@ async def get_my_venues():
 
 
 async def send_telegram_table(table):
-    plot_table = table.round(3).reset_index().rename(columns={'index': 'Index'})
+    plot_table = table.round(3).reset_index().rename(columns={'index': 'Index'}).fillna("")
     fig, ax = plt.subplots(1, 1)  # Adjust figure size based on table length
     ax.axis('off')
     the_table = ax.table(cellText=plot_table.values,
@@ -56,3 +58,18 @@ def get_unix_timestamp_for_hour(hour_str):
     unix_timestamp_ms = int(target_datetime.timestamp() * 1000)
 
     return unix_timestamp_ms, target_datetime
+
+
+def add_totals_row(df, label_column, total_columns):
+    # Calculate the totals for the specified columns
+    totals_data = {col: df[col].sum() for col in total_columns}
+
+    # Set the label for the totals row
+    totals_data[label_column] = "---TOTAL---"
+
+    # Create a new DataFrame for the totals row with the same columns as the original DataFrame
+    totals_row = pd.DataFrame([totals_data], columns=df.columns)
+
+    # Append the totals row to the original DataFrame and return it
+    df_with_totals = pd.concat([df, totals_row], ignore_index=True)
+    return df_with_totals

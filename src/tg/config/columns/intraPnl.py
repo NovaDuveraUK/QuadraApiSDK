@@ -8,6 +8,7 @@ def intra_pnl_columns():
         'no_trades',
         'vol_base',
         'vol_quote',
+        # 'vol_usd',
         'vol_24h',
         'pct_vol_24h',
         'maker_pct',
@@ -26,3 +27,31 @@ def intra_pnl_columns():
         'trade_n',
     ]
 
+# Description: Columns to SUM in the intra pnl table.
+def intra_pnl_columns_to_sum():
+    return [
+        # 'alias',
+        # 'company_exchange_id',
+        # 'exchange_id',
+        # 'symbol',
+        'no_trades',
+        'vol_base',
+        'vol_quote',
+        # 'vol_usd',
+        'vol_24h',
+        # 'pct_vol_24h',
+        # 'maker_pct',
+        # 'avg_buy',
+        # 'avg_sell',
+        # 'mark_price',
+        'fees_usd',
+        'pnl_quote_buys',
+        'pnl_quote_sells',
+        'pnl_quote',
+        'pnl_usd',
+        'pnl_incl_fees',
+        # 'pnl_per_vol_bps',
+        # 'pnl_per_vol_bps_fees',
+        # 'trade_1',
+        # 'trade_n',
+    ]

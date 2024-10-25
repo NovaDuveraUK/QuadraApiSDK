@@ -78,7 +78,7 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
             trade_summary['trade_1'] = group['trade_dt'].min()
             trade_summary['trade_n'] = group['trade_dt'].max()
 
-            print("Grouped DF", group.head(5))
+            # print("Grouped DF", group.head(5))
 
             trades_summary.append(trade_summary)
 

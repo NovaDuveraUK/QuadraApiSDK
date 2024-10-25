@@ -29,7 +29,7 @@ class ApiClient:
             endpoint_with_params = endpoint
 
         message = f"{timestamp}{method}{endpoint_with_params}{body}"
-        print("Prepared message: ", message)
+        # print("Prepared message: ", message)
         signature = hmac.new(self.secret_key.encode(), message.encode(), hashlib.sha256).hexdigest()
         return timestamp, signature
 
@@ -46,7 +46,7 @@ class ApiClient:
             'Accept': 'application/json'
         }
 
-        print(f"Requesting {method} {url} with headers: {headers} and body: {body_string}")
+        print(f"Requesting {method} {url} with body: {body_string}")
 
         async with aiohttp.ClientSession() as session:
             async with session.request(method, url, headers=headers, params=params, data=body_string) as response:

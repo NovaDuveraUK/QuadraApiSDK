@@ -10,7 +10,7 @@ def intra_pnl_columns():
         'vol_quote',
         'vol_24h',
         'pct_vol_24h',
-        'maker',
+        'maker_pct',
         'avg_price',
         'mark_price',
         'fees_usd',
@@ -18,5 +18,7 @@ def intra_pnl_columns():
         'pnl_incl_fees',
         'pnl_per_vol_bps',
         'pnl_per_vol_bps_fees',
+        'trade_1',
+        'trade_n',
     ]
 

@@ -11,7 +11,16 @@ TOKEN = config('TELEGRAM_BOT_TOKEN')
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(f'Hello {update.effective_user.first_name}, from py')
+    await update.message.reply_text(
+        f'<b>Hello {update.effective_user.first_name} I am your Telegram Bot!</b>\n'
+        f'<b>Commands:</b>\n'
+        f'<code>/positions &lt;exchange_id&gt;</code> - Get your live positions\n'
+        f'<code>/openOrders &lt;exchange_id&gt;</code> - Get your live open orders\n'
+        f'<code>/intraPnl &lt;snap_time&gt; &lt;exchange_id&gt;</code> - Get your intra pnl\n'
+        f'<code>/balances &lt;exchange_id&gt;</code> - Get your live balances\n'
+        f'<code>/balanceChanges &lt;snap_time&gt;</code> - Get your balance changes\n',
+        parse_mode='HTML'
+    )
 
 
 def main():
@@ -20,10 +29,12 @@ def main():
     application = ApplicationBuilder().token(TOKEN).build()
 
     # Add command handlers
-    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", start))
     application.add_handler(CommandHandler("positions", run_positions))
     application.add_handler(CommandHandler("openOrders", run_open_orders))
     application.add_handler(CommandHandler("intraPnl", run_intra_pnl))
+    application.add_handler(CommandHandler("balanceChanges", run_balances))
+
 
     # Create a JobQueue instance and start it
     # job_queue = JobQueue()

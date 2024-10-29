@@ -3,6 +3,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, JobQueue
 from decouple import config
 
+from src.tg.handlers.balanceChanges import run_balances_changes
 from src.tg.handlers.intraTrading import run_intra_pnl
 from src.tg.handlers.openOrders import run_open_orders
 from src.tg.handlers.positions import run_positions
@@ -17,7 +18,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f'<code>/positions &lt;exchange_id&gt;</code> - Get your live positions\n'
         f'<code>/openOrders &lt;exchange_id&gt;</code> - Get your live open orders\n'
         f'<code>/intraPnl &lt;snap_time&gt; &lt;exchange_id&gt;</code> - Get your intra pnl\n'
-        f'<code>/balances &lt;exchange_id&gt;</code> - Get your live balances\n'
+        # f'<code>/balances &lt;exchange_id&gt;</code> - Get your live balances\n'
         f'<code>/balanceChanges &lt;snap_time&gt;</code> - Get your balance changes\n',
         parse_mode='HTML'
     )
@@ -33,7 +34,7 @@ def main():
     application.add_handler(CommandHandler("positions", run_positions))
     application.add_handler(CommandHandler("openOrders", run_open_orders))
     application.add_handler(CommandHandler("intraPnl", run_intra_pnl))
-    application.add_handler(CommandHandler("balanceChanges", run_balances))
+    application.add_handler(CommandHandler("balanceChanges", run_balances_changes))
 
 
     # Create a JobQueue instance and start it

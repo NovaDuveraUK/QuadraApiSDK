@@ -13,6 +13,23 @@ from src.tg.config.venues.intraPnl import intra_pnl_venues
 from src.tg.handlers.shared import get_my_venues, send_telegram_table, get_unix_timestamp_for_hour, add_totals_row
 
 
+def add_intra_totals_row(df, label_column, total_columns):
+    # Calculate the totals for the specified columns
+    totals_data = {col: df[col].sum() for col in total_columns}
+    totals_data['pnl_per_vol_bps'] = df['pnl_usd'].sum() / df['vol_usd'].sum() * 1e4
+    totals_data['pnl_per_vol_bps_fees'] = df['pnl_incl_fees'].sum() / df['vol_usd'].sum() * 1e4
+
+    # Set the label for the totals row
+    totals_data[label_column] = "TOTAL"
+
+    # Create a new DataFrame for the totals row with the same columns as the original DataFrame
+    totals_row = pd.DataFrame([totals_data], columns=df.columns)
+
+    # Append the totals row to the original DataFrame and return it
+    df_with_totals = pd.concat([df, totals_row], ignore_index=True)
+    return df_with_totals
+
+
 async def fetch_trades(start_time: int, exchange_ids: List[str]):
     limit = 10000
     # Get venues firstly:
@@ -116,7 +133,7 @@ async def fetch_trades(start_time: int, exchange_ids: List[str]):
 
     combined_df = pd.DataFrame(trades_summary)
 
-    combined_df = add_totals_row(combined_df, 'alias', intra_pnl_columns_to_sum())
+    combined_df = add_intra_totals_row(combined_df, 'alias', intra_pnl_columns_to_sum())
 
     # print("Combined DF", combined_df.head(5))
 

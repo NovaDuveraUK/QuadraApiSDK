@@ -18,8 +18,11 @@ async def get_my_venues():
     return venues_df
 
 
-async def send_telegram_table(table):
-    plot_table = table.round(3).reset_index().rename(columns={'index': 'Index'}).fillna("")
+async def send_telegram_table(table, round_value: int = 3):
+    formatted_table = table.round(round_value).fillna("").map(
+        lambda x: f"{x:,.{round_value}f}" if isinstance(x, (int, float)) else x
+    )
+    plot_table = formatted_table.reset_index().rename(columns={'index': 'Index'})
     fig, ax = plt.subplots(1, 1)  # Adjust figure size based on table length
     ax.axis('off')
     the_table = ax.table(cellText=plot_table.values,
@@ -65,7 +68,7 @@ def add_totals_row(df, label_column, total_columns):
     totals_data = {col: df[col].sum() for col in total_columns}
 
     # Set the label for the totals row
-    totals_data[label_column] = "---TOTAL---"
+    totals_data[label_column] = "TOTAL"
 
     # Create a new DataFrame for the totals row with the same columns as the original DataFrame
     totals_row = pd.DataFrame([totals_data], columns=df.columns)
@@ -73,3 +76,5 @@ def add_totals_row(df, label_column, total_columns):
     # Append the totals row to the original DataFrame and return it
     df_with_totals = pd.concat([df, totals_row], ignore_index=True)
     return df_with_totals
+
+

@@ -7,11 +7,6 @@ import json
 from urllib.parse import urlencode
 from decouple import config
 
-base_url = config('WS_API_URL_LOCAL')
-api_key = config('API_KEY')
-secret_key = config('SECRET_KEY')
-
-
 class WsClient:
     def __init__(self, base_url, api_key, secret_key, query=None):
         self.query = query
@@ -94,6 +89,9 @@ class WsClient:
 
 # Example usage
 async def main():
+    base_url = config('WS_API_URL')
+    api_key = config('API_KEY')
+    secret_key = config('SECRET_KEY')
     ws_client = WsClient(base_url, api_key, secret_key)
     await ws_client.connect()
 

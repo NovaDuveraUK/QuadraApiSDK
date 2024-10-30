@@ -27,6 +27,7 @@ def intra_pnl_columns():
         'trade_n',
     ]
 
+
 # Description: Columns to SUM in the intra pnl table.
 def intra_pnl_columns_to_sum():
     return [

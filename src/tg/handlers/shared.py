@@ -19,10 +19,16 @@ async def get_my_venues():
 
 
 async def send_telegram_table(table, round_value: int = 3):
-    formatted_table = table.round(round_value).fillna("").map(
-        lambda x: f"{x:,.{round_value}f}" if isinstance(x, (int, float)) else x
-    )
+    # Round numeric columns and fill NaNs with empty strings for clean display
+    formatted_table = table.round(round_value).fillna("")
+
+    # Format only numeric columns
+    for col in formatted_table.select_dtypes(include=[float, int]).columns:
+        formatted_table[col] = formatted_table[col].apply(lambda x: f"{x:,.{round_value}f}" if x != "" else x)
+
+    # Reset the index and rename the index column if needed
     plot_table = formatted_table.reset_index().rename(columns={'index': 'Index'})
+
     fig, ax = plt.subplots(1, 1)  # Adjust figure size based on table length
     ax.axis('off')
     the_table = ax.table(cellText=plot_table.values,

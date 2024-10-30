@@ -13,7 +13,7 @@ from src.tg.config.venues.balanceChanges import balance_changes_venues
 from src.tg.handlers.shared import get_my_venues, send_telegram_table, get_unix_timestamp_for_hour, add_totals_row
 
 
-async def fetch_balances_history(start_time: int, exchange_ids: List[str]):
+async def fetch_balances_history(start_time: int, exchange_ids: List[str], time_bucket: str = '1h'):
     # Get venues firstly:
     venues_df = await get_my_venues()
     # Filter ones that are not in exchange_ids, col: 'exchange_id'
@@ -41,7 +41,7 @@ async def fetch_balances_history(start_time: int, exchange_ids: List[str]):
     # Bucket 'dt' to the nearest hour or minute
     # For nearest hour: combined_df['dt_bucket'] = combined_df['dt'].dt.floor('H')
     # For nearest minute: combined_df['dt_bucket'] = combined_df['dt'].dt.floor('T')
-    combined_df['dt_bucket'] = combined_df['dt'].dt.floor('h')  # Adjust 'h' to 't' if minute-level bucketing is desired
+    combined_df['dt_bucket'] = combined_df['dt'].dt.floor(time_bucket)  # Adjust 'h' to 't' if minute-level bucketing is desired
 
     # Sort by 'dt' so that the earliest records in each hour are first
     combined_df = combined_df.sort_values(by=['company_exchange_id', 'dt'])
@@ -68,7 +68,7 @@ async def fetch_balances_history(start_time: int, exchange_ids: List[str]):
         columns='alias',
         values='current_balance_usd',
         aggfunc='first'
-    )
+    ).reset_index()
 
     # Add a row-wise total column
     result_df['total'] = result_df.sum(axis=1, numeric_only=True)
@@ -76,7 +76,7 @@ async def fetch_balances_history(start_time: int, exchange_ids: List[str]):
     result_df['total_abs_chg'] = result_df['total'].diff()
     result_df['total_pct_chg'] = result_df['total'].pct_change() * 100  # Convert to percentage
 
-    result_df = add_totals_row(result_df, 'total', balance_changes_columns_to_sum())
+    result_df = add_totals_row(result_df, 'dt_bucket', balance_changes_columns_to_sum())
     return result_df
 
 
@@ -84,17 +84,21 @@ async def run_balances_changes(update: Update, context: ContextTypes.DEFAULT_TYP
     await update.message.reply_text("Fetching balance change data...")
     try:
         hour_input = "0"
+        time_bucket = "1h"
         exchange_ids = balance_changes_venues()
         # # Get the arguments passed after the command (intraPnl <variable> <variable2>)
         if context.args:  # Check if there are any arguments passed
             hour_input = context.args[0]  # First argument after the command
             # print("Hour input: ", hour_input)
             if len(context.args) > 1:
-                exchange_ids = [context.args[1]]  # First argument after the command
+                exchange_ids = [context.args[1]]  # Second argument after the command
+                if len(context.args) > 2:
+                    time_bucket = context.args[2]  # First argument after the command
+
             # Apply filter to the table based on exchange_id
         timestamp_ms, target_datetime = get_unix_timestamp_for_hour(hour_input)
         # print("Timestamps: ", timestamp_ms, target_datetime)
-        bal_table = await fetch_balances_history(timestamp_ms, exchange_ids)
+        bal_table = await fetch_balances_history(timestamp_ms, exchange_ids, time_bucket)
 
         # Check if the table is empty
         if bal_table.empty:

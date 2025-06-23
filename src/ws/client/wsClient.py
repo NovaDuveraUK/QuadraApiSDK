@@ -51,6 +51,7 @@ class WsClient:
         await self.send(login)
         print("Running query")
         if self.query:
+            await asyncio.sleep(2)  # sleeps for 2 seconds
             await self.send(json.dumps(self.query))
 
     async def on_message(self, message):

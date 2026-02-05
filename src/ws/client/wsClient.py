@@ -4,7 +4,6 @@ import hmac
 import hashlib
 import time
 import json
-from urllib.parse import urlencode
 from decouple import config
 
 class WsClient:
